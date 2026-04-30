@@ -41,14 +41,8 @@ render_bar() {
   (( pct < 0 )) && pct=0
   (( pct > 100 )) && pct=100
 
-  local color reset='\e[0m'
-  if (( pct >= 90 )); then color='\e[31m'
-  elif (( pct >= 70 )); then color='\e[33m'
-  else color='\e[32m'
-  fi
-
   if [[ "$MODE" == "text" ]]; then
-    printf "${color}%s%%${reset}" "$pct"
+    printf "%s%%" "$pct"
     return
   fi
 
@@ -58,27 +52,25 @@ render_bar() {
   local bar=""
   for (( j=0; j<filled; j++ )); do bar+="█"; done
   for (( j=0; j<empty; j++ )); do bar+="░"; done
-  printf "${color}%s %s%%${reset}" "$bar" "$pct"
+  printf "%s %s%%" "$bar" "$pct"
 }
 
-# Compute time remaining until reset (e.g. "3h54m" or "42m")
 render_reset() {
   local ts="$1"
   [[ -z "$ts" ]] && return
   local now diff
   now=$(date +%s)
   diff=$(( ts - now ))
-  (( diff <= 0 )) && printf '\e[2m~0m\e[0m' && return
+  (( diff <= 0 )) && printf '~0' && return
   local h=$(( diff / 3600 ))
   local m=$(( (diff % 3600) / 60 ))
   if (( h > 0 )); then
-    printf '\e[2m%dh%02d\e[0m' "$h" "$m"
+    printf '%dh%02d' "$h" "$m"
   else
-    printf '\e[2m%d\e[0m' "$m"
+    printf '%d' "$m"
   fi
 }
 
-# Compute real context % from token counts (more accurate than used_percentage)
 ctx_real_pct=""
 if [[ -n "$ctx_tokens" && -n "$ctx_total" && "$ctx_total" -gt 0 ]]; then
   ctx_real_pct=$(( ctx_tokens * 100 / ctx_total ))
@@ -90,14 +82,14 @@ if [[ -n "$model_name" ]]; then
   line1+=" ${model_name}"
 fi
 if [[ -n "$ctx_real_pct" ]]; then
-  line1+=" \e[2m│\e[0m Ctx:$(render_bar "$ctx_real_pct")"
+  line1+=" │ Ctx:$(render_bar "$ctx_real_pct")"
   if [[ -n "$ctx_tokens" && -n "$ctx_total" ]]; then
     ctx_k=$(( ctx_tokens / 1000 ))
     ctx_max_k=$(( ctx_total / 1000 ))
-    line1+=" \e[2m│ ${ctx_k}k/${ctx_max_k}k\e[0m"
+    line1+=" │ ${ctx_k}k/${ctx_max_k}k"
   fi
   if (( ctx_real_pct >= 50 )); then
-    line1+=" \e[2m│\e[0m \e[33m⚡ /compact\e[0m"
+    line1+=" │ ⚡ /compact"
   fi
 fi
 
@@ -107,22 +99,22 @@ sep=false
 if [[ -n "$five_h" ]]; then
   line2+="5h:$(render_bar "$five_h")"
   if [[ -n "$five_h_resets" ]]; then
-    line2+=" \e[2m↺\e[0m$(render_reset "$five_h_resets")"
+    line2+=" ↺$(render_reset "$five_h_resets")"
   fi
   sep=true
 fi
 if [[ -n "$seven_d" ]]; then
-  $sep && line2+=" \e[2m│\e[0m "
+  $sep && line2+=" │ "
   line2+="7j:$(render_bar "$seven_d")"
   if [[ -n "$seven_d_resets" ]]; then
-    line2+=" \e[2m↺\e[0m$(render_reset "$seven_d_resets")"
+    line2+=" ↺$(render_reset "$seven_d_resets")"
   fi
   sep=true
 fi
 if [[ -n "$cost_usd" ]]; then
-  $sep && line2+=" \e[2m│\e[0m "
+  $sep && line2+=" │ "
   cost_fmt=$(printf '%.4f' "$cost_usd" 2>/dev/null)
-  line2+="\e[2m\$${cost_fmt}\e[0m"
+  line2+="\$${cost_fmt}"
 fi
 
-printf '%b\n%b\n' "$line1" "$line2"
+printf '%s\n%s\n' "$line1" "$line2"
