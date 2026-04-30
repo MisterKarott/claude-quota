@@ -1,5 +1,5 @@
 #!/bin/bash
-# Statusline script for Claude Pro — 2 lines: model/context + rate limits/cost
+# Statusline script for Claude Pro — 2 lines: model/context + rate limits/cost/reset
 # Reads JSON injected by Claude Code via stdin
 
 MODE="bar"
@@ -16,6 +16,8 @@ ctx_total=""
 model_name=""
 five_h=""
 seven_d=""
+five_h_resets=""
+seven_d_resets=""
 cost_usd=""
 
 if [[ ! -t 0 ]]; then
@@ -27,6 +29,8 @@ if [[ ! -t 0 ]]; then
     model_name=$(echo "$input" | jq -r '.model.display_name // .model.id // empty' 2>/dev/null)
     five_h=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty' 2>/dev/null)
     seven_d=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // empty' 2>/dev/null)
+    five_h_resets=$(echo "$input" | jq -r '.rate_limits.five_hour.resets_at // empty' 2>/dev/null)
+    seven_d_resets=$(echo "$input" | jq -r '.rate_limits.seven_day.resets_at // empty' 2>/dev/null)
     cost_usd=$(echo "$input" | jq -r '.cost.total_cost_usd // empty' 2>/dev/null)
   fi
 fi
@@ -57,6 +61,23 @@ render_bar() {
   printf "${color}%s %s%%${reset}" "$bar" "$pct"
 }
 
+# Compute time remaining until reset (e.g. "3h54m" or "42m")
+render_reset() {
+  local ts="$1"
+  [[ -z "$ts" ]] && return
+  local now diff
+  now=$(date +%s)
+  diff=$(( ts - now ))
+  (( diff <= 0 )) && printf '\e[2m~0m\e[0m' && return
+  local h=$(( diff / 3600 ))
+  local m=$(( (diff % 3600) / 60 ))
+  if (( h > 0 )); then
+    printf '\e[2m%dh%02dm\e[0m' "$h" "$m"
+  else
+    printf '\e[2m%dm\e[0m' "$m"
+  fi
+}
+
 # Compute real context % from token counts (more accurate than used_percentage)
 ctx_real_pct=""
 if [[ -n "$ctx_tokens" && -n "$ctx_total" && "$ctx_total" -gt 0 ]]; then
@@ -80,16 +101,22 @@ if [[ -n "$ctx_real_pct" ]]; then
   fi
 fi
 
-# Line 2: rate limits + cost
+# Line 2: rate limits + reset times + cost
 line2="  "
 sep=false
 if [[ -n "$five_h" ]]; then
   line2+="5h:$(render_bar "$five_h")"
+  if [[ -n "$five_h_resets" ]]; then
+    line2+=" \e[2m↺\e[0m$(render_reset "$five_h_resets")"
+  fi
   sep=true
 fi
 if [[ -n "$seven_d" ]]; then
   $sep && line2+=" \e[2m│\e[0m "
   line2+="7j:$(render_bar "$seven_d")"
+  if [[ -n "$seven_d_resets" ]]; then
+    line2+=" \e[2m↺\e[0m$(render_reset "$seven_d_resets")"
+  fi
   sep=true
 fi
 if [[ -n "$cost_usd" ]]; then
