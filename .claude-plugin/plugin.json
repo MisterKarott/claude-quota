@@ -1,0 +1,12 @@
+{
+  "name": "claude-quota",
+  "version": "1.0.0",
+  "description": "Claude Pro quota statusline and detailed quota skill for Claude Code",
+  "author": {
+    "name": "Chris MisterK",
+    "url": "https://github.com/MisterKarott"
+  },
+  "repository": "https://github.com/MisterKarott/claude-quota",
+  "license": "MIT",
+  "keywords": ["claude", "pro", "quota", "statusline", "monitoring"]
+}
