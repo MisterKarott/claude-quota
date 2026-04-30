@@ -19,16 +19,25 @@ Claude Pro limite l'usage sur deux fenêtres :
 - **Fenêtre 5h** — tokens consommés sur les 5 dernières heures
 - **Fenêtre 7j** — tokens consommés sur les 7 derniers jours
 
-`claude-quota` affiche ces deux limites + le coût de session en **temps réel** dans ta statusline Claude Code.
+`claude-quota` affiche le modèle, l'usage du contexte, les limites de tokens et le coût de session en **temps réel** dans ta statusline Claude Code — sur deux lignes.
 
 ### Exemple de statusline
 
 ```
-◆ 5h:██████░░░░ 62% │ 7j:███░░░░░░░ 28% │ $0.0234
+◆ Claude Sonnet 4.6 │ Ctx:████░░░░░░ 42% │ 42k/100k
+   5h:██████░░░░ 62% │ 7j:███░░░░░░░ 28% │ $0.0234
 ```
 
+Quand le contexte dépasse 50% :
+
+```
+◆ Claude Sonnet 4.6 │ Ctx:██████░░░░ 62% │ 62k/100k │ ⚡ /compact
+   5h:██████░░░░ 62% │ 7j:███░░░░░░░ 28% │ $0.0234
+```
+
+- **Ligne 1** : modèle actif + barre de contexte + token count + hint `/compact` si ≥ 50%
+- **Ligne 2** : fenêtres de rate limit + coût de session
 - **Couleurs** : vert (< 70%), jaune (70–90%), rouge (≥ 90%)
-- **Coût session** : affiché en USD
 
 ### Skill `/quota`
 
@@ -66,10 +75,18 @@ Dans `~/.claude/settings.json` :
 
 ## Comment ça marche
 
-Claude Code injecte les données de rate limit via stdin à chaque tour. Le script lit :
+Claude Code injecte les données via stdin à chaque tour. Le script lit :
 
 ```json
 {
+  "model": { "display_name": "Claude Sonnet 4.6" },
+  "context_window": {
+    "used_percentage": 42,
+    "context_window_size": 100000,
+    "total_input_tokens": 38000,
+    "total_output_tokens": 4000,
+    "current_usage": { "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0 }
+  },
   "rate_limits": {
     "five_hour": { "used_percentage": 62 },
     "seven_day": { "used_percentage": 28 }
@@ -96,6 +113,7 @@ Aucun appel API externe — tout vient de Claude Code en local.
 | Feature | glm-quota | claude-quota |
 |---------|-----------|--------------|
 | Source des données | API Z.ai | Stdin Claude Code |
+| Modèle + contexte | Oui | Oui |
 | Reset timers | Oui (depuis API) | Non disponible |
 | MCP calls | Oui (Z.ai) | Non |
 | Hook SessionStart | Oui (cohérence MCP) | Non |
