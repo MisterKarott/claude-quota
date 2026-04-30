@@ -2,6 +2,10 @@
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "github-MisterKarott-claude-quota",
   "version": "1.0.0",
+  "description": "Claude Pro quota statusline and detailed quota skill for Claude Code",
+  "owner": {
+    "name": "Chris MisterK"
+  },
   "plugins": [{
     "name": "claude-quota",
     "source": "./",
