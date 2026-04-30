@@ -72,9 +72,9 @@ render_reset() {
   local h=$(( diff / 3600 ))
   local m=$(( (diff % 3600) / 60 ))
   if (( h > 0 )); then
-    printf '\e[2m%dh%02dm\e[0m' "$h" "$m"
+    printf '\e[2m%dh%02d\e[0m' "$h" "$m"
   else
-    printf '\e[2m%dm\e[0m' "$m"
+    printf '\e[2m%d\e[0m' "$m"
   fi
 }
 
