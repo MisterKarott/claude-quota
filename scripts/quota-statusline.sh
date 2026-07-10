@@ -19,10 +19,12 @@ seven_d=""
 five_h_resets=""
 seven_d_resets=""
 cost_usd=""
+cwd=""
 
 if [[ ! -t 0 ]]; then
   input=$(cat 2>/dev/null || true)
   if [[ -n "$input" ]]; then
+    cwd=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // empty' 2>/dev/null)
     ctx_pct=$(echo "$input" | jq -r '.context_window.used_percentage // empty' 2>/dev/null)
     ctx_total=$(echo "$input" | jq -r '.context_window.context_window_size // empty' 2>/dev/null)
     ctx_tokens=$(echo "$input" | jq -r '(.context_window.total_input_tokens // 0) + (.context_window.total_output_tokens // 0) + (.context_window.current_usage.cache_read_input_tokens // 0) + (.context_window.current_usage.cache_creation_input_tokens // 0)' 2>/dev/null)
@@ -76,6 +78,12 @@ if [[ -n "$ctx_tokens" && -n "$ctx_total" && "$ctx_total" -gt 0 ]]; then
   ctx_real_pct=$(( ctx_tokens * 100 / ctx_total ))
 fi
 
+# Line 0: current working directory
+line0=""
+if [[ -n "$cwd" ]]; then
+  line0="${cwd/#$HOME/~}"
+fi
+
 # Line 1: model + context bar + token count + /compact hint
 line1="◆"
 if [[ -n "$model_name" ]]; then
@@ -117,4 +125,8 @@ if [[ -n "$cost_usd" ]]; then
   line2+="\$${cost_fmt}"
 fi
 
-printf '%s\n%s\n' "$line1" "$line2"
+if [[ -n "$line0" ]]; then
+  printf '%s\n%s\n%s\n' "$line0" "$line1" "$line2"
+else
+  printf '%s\n%s\n' "$line1" "$line2"
+fi
