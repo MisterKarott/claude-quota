@@ -81,7 +81,7 @@ fi
 # Line 0: current working directory
 line0=""
 if [[ -n "$cwd" ]]; then
-  line0="${cwd/#$HOME/~}"
+  line0="/${cwd##*/}"
 fi
 
 # Line 1: model + context bar + token count + /compact hint
