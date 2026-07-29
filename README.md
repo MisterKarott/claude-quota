@@ -19,24 +19,27 @@ Claude Pro limite l'usage sur deux fenêtres :
 - **Fenêtre 5h** — tokens consommés sur les 5 dernières heures
 - **Fenêtre 7j** — tokens consommés sur les 7 derniers jours
 
-`claude-quota` affiche le modèle, l'usage du contexte, les limites de tokens, le temps avant réinitialisation et le coût de session en **temps réel** dans ta statusline Claude Code — sur deux lignes, sans couleur.
+`claude-quota` affiche le modèle, l'usage du contexte, les limites de tokens, le temps avant réinitialisation et le solde extra usage restant en **temps réel** dans ta statusline Claude Code — sur trois lignes, sans couleur.
 
 ### Exemple de statusline
 
 ```
-◆ Sonnet 4.6 (1M context) │ Ctx:████░░░░░░ 42% │ 42k/1000k
-  5h:██████░░░░ 62% ↺1h23 │ 7j:███░░░░░░░ 28% ↺31h05 │ $0.0234
+/mon-projet │ Ctx:████░░░░░░ 42% │ 42k/1000k
+5h:██████░░░░ 62% ↺1h23 │ 7j:███░░░░░░░ 28% ↺31h05
+◆ Sonnet 4.6 (1M context) │ $0.0234 │ $93.55
 ```
 
 Quand le contexte dépasse 50% :
 
 ```
-◆ Sonnet 4.6 (1M context) │ Ctx:██████░░░░ 62% │ 62k/1000k │ ⚡ /compact
-  5h:██████░░░░ 62% ↺1h23 │ 7j:███░░░░░░░ 28% ↺31h05 │ $0.0234
+/mon-projet │ Ctx:██████░░░░ 62% │ 62k/1000k │ ⚡ /compact
+5h:██████░░░░ 62% ↺1h23 │ 7j:███░░░░░░░ 28% ↺31h05
+◆ Sonnet 4.6 (1M context) │ $0.0234 │ $93.55
 ```
 
-- **Ligne 1** : modèle actif + barre de contexte + token count + hint `/compact` si ≥ 50%
-- **Ligne 2** : fenêtres de rate limit + temps avant reset (`↺Xh MM`) + coût de session
+- **Ligne 1** : dossier actif + barre de contexte + token count + hint `/compact` si ≥ 50%
+- **Ligne 2** : fenêtres de rate limit + temps avant reset (`↺Xh MM`)
+- **Ligne 3** : modèle actif + coût extra usage en cours + solde extra usage restant
 - **Affichage** : noir et blanc, pas de couleur
 
 ### Skill `/quota`
@@ -101,7 +104,7 @@ Claude Code injecte les données via stdin à chaque tour. Le script lit :
 }
 ```
 
-Aucun appel API externe — tout vient de Claude Code en local.
+Le solde extra usage est récupéré via `/api/oauth/organizations/{org}/prepaid/credits` (token OAuth du keychain macOS), mis en cache 5 min et rafraîchi en arrière-plan. Le reste vient de Claude Code en local.
 
 ---
 

@@ -1,6 +1,30 @@
 #!/bin/bash
-# Statusline script for Claude Pro — 2 lines: model/context + rate limits/cost/reset
+# Statusline script for Claude Pro — 3 lines: cwd + model/context + rate limits/extra-usage balance
 # Reads JSON injected by Claude Code via stdin
+
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/claude-quota"
+BALANCE_CACHE="$CACHE_DIR/balance"
+BALANCE_TTL=300
+
+# --refresh-balance: internal mode, fetches the prepaid credit balance into the cache
+if [[ "$1" == "--refresh-balance" ]]; then
+  mkdir -p "$CACHE_DIR"
+  org=$(jq -r '.oauthAccount.organizationUuid // empty' "$HOME/.claude.json" 2>/dev/null)
+  tok=$(security find-generic-password -s "Claude Code-credentials" -w 2>/dev/null \
+        | jq -r '.claudeAiOauth.accessToken // empty' 2>/dev/null)
+  [[ -z "$org" || -z "$tok" ]] && exit 0
+  resp=$(curl -s -m 10 \
+    "https://api.anthropic.com/api/oauth/organizations/$org/prepaid/credits" \
+    -H "Authorization: Bearer $tok" -H "Content-Type: application/json" 2>/dev/null)
+  cents=$(echo "$resp" | jq -r '.amount // empty' 2>/dev/null)
+  if [[ "$cents" =~ ^-?[0-9]+$ ]]; then
+    printf '%s\n' "$cents" > "$BALANCE_CACHE.tmp" && mv "$BALANCE_CACHE.tmp" "$BALANCE_CACHE"
+  else
+    # keep the stale value but bump mtime so we don't hammer the API on failure
+    [[ -f "$BALANCE_CACHE" ]] && touch "$BALANCE_CACHE"
+  fi
+  exit 0
+fi
 
 MODE="bar"
 while [[ $# -gt 0 ]]; do
@@ -73,24 +97,39 @@ render_reset() {
   fi
 }
 
+# Extra-usage balance: read from cache, refresh in background when stale
+read_balance() {
+  local now mtime age
+  now=$(date +%s)
+  if [[ -f "$BALANCE_CACHE" ]]; then
+    mtime=$(stat -f %m "$BALANCE_CACHE" 2>/dev/null || stat -c %Y "$BALANCE_CACHE" 2>/dev/null)
+    age=$(( now - ${mtime:-0} ))
+    cat "$BALANCE_CACHE" 2>/dev/null
+  else
+    age=$(( BALANCE_TTL + 1 ))
+  fi
+  if (( age > BALANCE_TTL )); then
+    ( "$0" --refresh-balance >/dev/null 2>&1 & ) &
+  fi
+}
+balance_cents=$(read_balance)
+
 ctx_real_pct=""
 if [[ -n "$ctx_tokens" && -n "$ctx_total" && "$ctx_total" -gt 0 ]]; then
   ctx_real_pct=$(( ctx_tokens * 100 / ctx_total ))
 fi
 
-# Line 0: current working directory
-line0=""
+# ── Line 1: cwd │ context bar │ token count │ /compact hint
+line1=""
+sep1=false
 if [[ -n "$cwd" ]]; then
-  line0="/${cwd##*/}"
-fi
-
-# Line 1: model + context bar + token count + /compact hint
-line1="◆"
-if [[ -n "$model_name" ]]; then
-  line1+=" ${model_name}"
+  line1+="/${cwd##*/}"
+  sep1=true
 fi
 if [[ -n "$ctx_real_pct" ]]; then
-  line1+=" │ Ctx:$(render_bar "$ctx_real_pct")"
+  $sep1 && line1+=" │ "
+  line1+="Ctx:$(render_bar "$ctx_real_pct")"
+  sep1=true
   if [[ -n "$ctx_tokens" && -n "$ctx_total" ]]; then
     ctx_k=$(( ctx_tokens / 1000 ))
     ctx_max_k=$(( ctx_total / 1000 ))
@@ -101,32 +140,38 @@ if [[ -n "$ctx_real_pct" ]]; then
   fi
 fi
 
-# Line 2: rate limits + reset times + cost
-line2="  "
-sep=false
+# ── Line 2: 5h window │ 7d window
+line2=""
+sep2=false
 if [[ -n "$five_h" ]]; then
   line2+="5h:$(render_bar "$five_h")"
-  if [[ -n "$five_h_resets" ]]; then
-    line2+=" ↺$(render_reset "$five_h_resets")"
-  fi
-  sep=true
+  [[ -n "$five_h_resets" ]] && line2+=" ↺$(render_reset "$five_h_resets")"
+  sep2=true
 fi
 if [[ -n "$seven_d" ]]; then
-  $sep && line2+=" │ "
+  $sep2 && line2+=" │ "
   line2+="7j:$(render_bar "$seven_d")"
-  if [[ -n "$seven_d_resets" ]]; then
-    line2+=" ↺$(render_reset "$seven_d_resets")"
-  fi
-  sep=true
-fi
-if [[ -n "$cost_usd" ]]; then
-  $sep && line2+=" │ "
-  cost_fmt=$(printf '%.4f' "$cost_usd" 2>/dev/null)
-  line2+="\$${cost_fmt}"
+  [[ -n "$seven_d_resets" ]] && line2+=" ↺$(render_reset "$seven_d_resets")"
+  sep2=true
 fi
 
-if [[ -n "$line0" ]]; then
-  printf '%s\n%s\n%s\n' "$line0" "$line1" "$line2"
-else
-  printf '%s\n%s\n' "$line1" "$line2"
+# ── Line 3: model │ extra usage spent │ extra usage balance
+line3=""
+sep3=false
+if [[ -n "$model_name" ]]; then
+  line3+="◆ ${model_name}"
+  sep3=true
 fi
+if [[ -n "$cost_usd" ]]; then
+  $sep3 && line3+=" │ "
+  line3+="\$$(printf '%.4f' "$cost_usd" 2>/dev/null)"
+  sep3=true
+fi
+if [[ "$balance_cents" =~ ^-?[0-9]+$ ]]; then
+  $sep3 && line3+=" │ "
+  line3+="\$$(awk -v c="$balance_cents" 'BEGIN{printf "%.2f", c/100}')"
+fi
+
+for l in "$line1" "$line2" "$line3"; do
+  [[ -n "$l" ]] && printf '%s\n' "$l"
+done
