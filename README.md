@@ -70,7 +70,7 @@ Dans `~/.claude/settings.json` :
 {
   "statusLine": {
     "type": "command",
-    "command": "bash ${HOME}/.claude/plugins/cache/github-MisterKarott-claude-quota/claude-quota/1.3.0/scripts/quota-statusline.sh --mode bar",
+    "command": "bash ${HOME}/.claude/plugins/cache/github-MisterKarott-claude-quota/claude-quota/1.3.1/scripts/quota-statusline.sh --mode bar",
     "padding": 0
   }
 }
