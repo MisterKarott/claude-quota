@@ -26,7 +26,7 @@ Claude Pro limite l'usage sur deux fenêtres :
 ```
 /mon-projet │ Ctx:████░░░░░░ 42% │ 42k/1000k
 5h:██████░░░░ 62% ↺1h23 │ 7j:███░░░░░░░ 28% ↺31h05
-◆ Sonnet 4.6 (1M context) │ $0.0234 │ $93.55
+◆ Opus 5 (1M context) │ $93.55 │ $0.0234
 ```
 
 Quand le contexte dépasse 50% :
@@ -34,12 +34,12 @@ Quand le contexte dépasse 50% :
 ```
 /mon-projet │ Ctx:██████░░░░ 62% │ 62k/1000k │ ⚡ /compact
 5h:██████░░░░ 62% ↺1h23 │ 7j:███░░░░░░░ 28% ↺31h05
-◆ Sonnet 4.6 (1M context) │ $0.0234 │ $93.55
+◆ Opus 5 (1M context) │ $93.55 │ $0.0234
 ```
 
 - **Ligne 1** : dossier actif + barre de contexte + token count + hint `/compact` si ≥ 50%
 - **Ligne 2** : fenêtres de rate limit + temps avant reset (`↺Xh MM`)
-- **Ligne 3** : modèle actif + coût extra usage en cours + solde extra usage restant
+- **Ligne 3** : modèle actif + solde extra usage restant + coût API de la session
 - **Affichage** : noir et blanc, pas de couleur
 
 ### Skill `/quota`
@@ -70,7 +70,7 @@ Dans `~/.claude/settings.json` :
 {
   "statusLine": {
     "type": "command",
-    "command": "bash ${HOME}/.claude/plugins/cache/github-MisterKarott-claude-quota/claude-quota/1.0.0/scripts/quota-statusline.sh --mode bar",
+    "command": "bash ${HOME}/.claude/plugins/cache/github-MisterKarott-claude-quota/claude-quota/1.3.0/scripts/quota-statusline.sh --mode bar",
     "padding": 0
   }
 }
@@ -88,7 +88,7 @@ Claude Code injecte les données via stdin à chaque tour. Le script lit :
 
 ```json
 {
-  "model": { "display_name": "Claude Sonnet 4.6" },
+  "model": { "display_name": "Opus 5 (1M context)" },
   "context_window": {
     "used_percentage": 42,
     "context_window_size": 1000000,
