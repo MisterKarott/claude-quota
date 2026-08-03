@@ -162,14 +162,14 @@ if [[ -n "$model_name" ]]; then
   line3+="◆ ${model_name}"
   sep3=true
 fi
-if [[ -n "$cost_usd" ]]; then
-  $sep3 && line3+=" │ "
-  line3+="\$$(printf '%.4f' "$cost_usd" 2>/dev/null)"
-  sep3=true
-fi
 if [[ "$balance_cents" =~ ^-?[0-9]+$ ]]; then
   $sep3 && line3+=" │ "
   line3+="\$$(awk -v c="$balance_cents" 'BEGIN{printf "%.2f", c/100}')"
+  sep3=true
+fi
+if [[ -n "$cost_usd" ]]; then
+  $sep3 && line3+=" │ "
+  line3+="\$$(printf '%.4f' "$cost_usd" 2>/dev/null)"
 fi
 
 for l in "$line1" "$line2" "$line3"; do
