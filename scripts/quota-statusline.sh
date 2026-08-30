@@ -34,6 +34,29 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# Couleurs ANSI 256 par segment (désactivables via NO_COLOR, off en mode text)
+COLOR_ON=true
+[[ "$MODE" != "bar" ]] && COLOR_ON=false
+[[ -n "${NO_COLOR:-}" ]] && COLOR_ON=false
+
+C_CWD=245     # gris
+C_SEP=238     # gris foncé (séparateurs, ◆)
+C_CTX=250     # gris clair
+C_WARN=214    # orange (/compact)
+C_5H=116      # cyan
+C_7D=211      # rose
+C_MODEL=222   # or
+C_BALANCE=150 # vert
+C_COST=245    # gris
+
+c() { # c <code256> <texte>
+  if $COLOR_ON; then
+    printf '\033[38;5;%sm%s\033[0m' "$1" "$2"
+  else
+    printf '%s' "$2"
+  fi
+}
+
 ctx_pct=""
 ctx_tokens=""
 ctx_total=""
@@ -122,21 +145,24 @@ fi
 # ── Line 1: cwd │ context bar │ token count │ /compact hint
 line1=""
 sep1=false
+sep_line() { line1+=" $(c "$C_SEP" "│") "; }
 if [[ -n "$cwd" ]]; then
-  line1+="/${cwd##*/}"
+  line1+="$(c "$C_CWD" "/${cwd##*/}")"
   sep1=true
 fi
 if [[ -n "$ctx_real_pct" ]]; then
-  $sep1 && line1+=" │ "
-  line1+="Ctx:$(render_bar "$ctx_real_pct")"
+  $sep1 && sep_line
+  line1+="$(c "$C_CTX" "Ctx:$(render_bar "$ctx_real_pct")")"
   sep1=true
   if [[ -n "$ctx_tokens" && -n "$ctx_total" ]]; then
     ctx_k=$(( ctx_tokens / 1000 ))
     ctx_max_k=$(( ctx_total / 1000 ))
-    line1+=" │ ${ctx_k}k/${ctx_max_k}k"
+    sep_line
+    line1+="$(c "$C_CTX" "${ctx_k}k/${ctx_max_k}k")"
   fi
   if (( ctx_real_pct >= 50 )); then
-    line1+=" │ ⚡ /compact"
+    sep_line
+    line1+="$(c "$C_WARN" "⚡ /compact")"
   fi
 fi
 
@@ -144,14 +170,16 @@ fi
 line2=""
 sep2=false
 if [[ -n "$five_h" ]]; then
-  line2+="5h:$(render_bar "$five_h")"
-  [[ -n "$five_h_resets" ]] && line2+=" ↺$(render_reset "$five_h_resets")"
+  seg="5h:$(render_bar "$five_h")"
+  [[ -n "$five_h_resets" ]] && seg+=" ↺$(render_reset "$five_h_resets")"
+  line2+="$(c "$C_5H" "$seg")"
   sep2=true
 fi
 if [[ -n "$seven_d" ]]; then
-  $sep2 && line2+=" │ "
-  line2+="7j:$(render_bar "$seven_d")"
-  [[ -n "$seven_d_resets" ]] && line2+=" ↺$(render_reset "$seven_d_resets")"
+  $sep2 && line2+=" $(c "$C_SEP" "│") "
+  seg="7j:$(render_bar "$seven_d")"
+  [[ -n "$seven_d_resets" ]] && seg+=" ↺$(render_reset "$seven_d_resets")"
+  line2+="$(c "$C_7D" "$seg")"
   sep2=true
 fi
 
@@ -159,17 +187,17 @@ fi
 line3=""
 sep3=false
 if [[ -n "$model_name" ]]; then
-  line3+="◆ ${model_name}"
+  line3+="$(c "$C_MODEL" "◆ ${model_name}")"
   sep3=true
 fi
 if [[ "$balance_cents" =~ ^-?[0-9]+$ ]]; then
-  $sep3 && line3+=" │ "
-  line3+="\$$(awk -v c="$balance_cents" 'BEGIN{printf "%.2f", c/100}')"
+  $sep3 && line3+=" $(c "$C_SEP" "│") "
+  line3+="$(c "$C_BALANCE" "\$$(awk -v c="$balance_cents" 'BEGIN{printf "%.2f", c/100}')")"
   sep3=true
 fi
 if [[ -n "$cost_usd" ]]; then
-  $sep3 && line3+=" │ "
-  line3+="\$$(printf '%.4f' "$cost_usd" 2>/dev/null)"
+  $sep3 && line3+=" $(c "$C_SEP" "│") "
+  line3+="$(c "$C_COST" "\$$(printf '%.4f' "$cost_usd" 2>/dev/null)")"
 fi
 
 for l in "$line1" "$line2" "$line3"; do

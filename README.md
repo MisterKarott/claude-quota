@@ -19,7 +19,7 @@ Claude Code limite l'usage sur deux fenêtres, quel que soit l'abonnement :
 - **Fenêtre 5h** — tokens consommés sur les 5 dernières heures
 - **Fenêtre 7j** — tokens consommés sur les 7 derniers jours
 
-`claude-quota` affiche le modèle, l'usage du contexte, les limites de tokens, le temps avant réinitialisation et le solde extra usage restant en **temps réel** dans ta statusline Claude Code — sur trois lignes, sans couleur.
+`claude-quota` affiche le modèle, l'usage du contexte, les limites de tokens, le temps avant réinitialisation et le solde extra usage restant en **temps réel** dans ta statusline Claude Code — sur trois lignes, en couleur (une couleur par segment).
 
 ### Exemple de statusline
 
@@ -40,7 +40,7 @@ Quand le contexte dépasse 50% :
 - **Ligne 1** : dossier actif + barre de contexte + token count + hint `/compact` si ≥ 50%
 - **Ligne 2** : fenêtres de rate limit + temps avant reset (`↺Xh MM`)
 - **Ligne 3** : modèle actif + solde extra usage restant + coût API de la session
-- **Affichage** : noir et blanc, pas de couleur
+- **Affichage** : couleur par segment (ANSI 256), désactivable via `NO_COLOR=1`
 
 ### Skill `/quota`
 
@@ -70,7 +70,7 @@ Dans `~/.claude/settings.json` :
 {
   "statusLine": {
     "type": "command",
-    "command": "bash ${HOME}/.claude/plugins/cache/github-MisterKarott-claude-quota/claude-quota/1.3.3/scripts/quota-statusline.sh --mode bar",
+    "command": "bash ${HOME}/.claude/plugins/cache/github-MisterKarott-claude-quota/claude-quota/1.4.0/scripts/quota-statusline.sh --mode bar",
     "padding": 0
   }
 }
