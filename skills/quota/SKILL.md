@@ -16,11 +16,7 @@ Trigger on `/quota` slash command or when the user explicitly asks about their c
 
 ## Procedure
 
-### 1. Check mode
-
-If `ANTHROPIC_BASE_URL` contains `api.z.ai` or `bigmodel.cn`, this is GLM mode — inform the user this skill is for Claude Pro and stop.
-
-### 2. Read the statusline data
+### 1. Read the statusline data
 
 Run the statusline script in text mode to get the current values:
 
@@ -58,4 +54,3 @@ Claude Pro rate limits:
 ### Edge cases
 
 - No data yet → "Rate limit data not available yet. It appears after the first model turn."
-- GLM mode detected → "This skill is for Claude Pro. In GLM mode, use `/glm-quota:quota`."

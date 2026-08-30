@@ -70,7 +70,7 @@ Dans `~/.claude/settings.json` :
 {
   "statusLine": {
     "type": "command",
-    "command": "bash ${HOME}/.claude/plugins/cache/github-MisterKarott-claude-quota/claude-quota/1.3.1/scripts/quota-statusline.sh --mode bar",
+    "command": "bash ${HOME}/.claude/plugins/cache/github-MisterKarott-claude-quota/claude-quota/1.3.2/scripts/quota-statusline.sh --mode bar",
     "padding": 0
   }
 }
@@ -114,19 +114,6 @@ Le solde extra usage est récupéré via `/api/oauth/organizations/{org}/prepaid
 |-----------|------|-------------|
 | `quota-statusline.sh` | Script | Affichage statusline avec barres et temps de reset |
 | `quota` | Skill | Vue détaillée à la demande |
-
----
-
-## Différences avec glm-quota
-
-| Feature | glm-quota | claude-quota |
-|---------|-----------|--------------|
-| Source des données | API Z.ai | Stdin Claude Code |
-| Modèle + contexte | Oui | Oui |
-| Reset timers | Oui (depuis API) | Oui (depuis stdin) |
-| MCP calls | Oui (Z.ai) | Non |
-| Hook SessionStart | Oui (cohérence MCP) | Non |
-| Mode requis | GLM/Z.ai | Claude Pro |
 
 ---
 
