@@ -1,6 +1,6 @@
 {
   "name": "claude-quota",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Claude Code quota statusline and detailed quota skill, for any Claude Code CLI subscription",
   "author": {
     "name": "Chris MisterK",
