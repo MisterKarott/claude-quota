@@ -25,19 +25,11 @@ Why three lines instead of one: it takes up less width, so it stays readable whe
 
 ### Statusline example
 
-```
-/my-project │ Ctx:████░░░░░░ 42% │ 42k/1000k
-5h:██████░░░░ 62% ↺ 1h23 │ 7d:███░░░░░░░ 28% ↺ 5j10h
-◆ Opus 5 (1M context) │ $0.0234 │ $93.55
-```
+![Statusline example](assets/statusline-example.svg)
 
 When context usage goes above 50%:
 
-```
-/my-project │ Ctx:██████░░░░ 62% │ 62k/1000k │ ⚡ /compact
-5h:██████░░░░ 62% ↺ 1h23 │ 7d:███░░░░░░░ 28% ↺ 5j10h
-◆ Opus 5 (1M context) │ $0.0234 │ $93.55
-```
+![Statusline example with /compact hint](assets/statusline-compact.svg)
 
 - **Line 1**: active directory + context bar + token count + `/compact` hint if ≥ 50%
 - **Line 2**: rate limit windows + time until reset (`↺ Xh MM`, or `↺ Xj HHh` past 24h)

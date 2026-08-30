@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="140" viewBox="0 0 640 140" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="16">
+  <rect width="640" height="140" rx="12" fill="#1e1e2e"/>
+  <circle cx="24" cy="22" r="6" fill="#ff5f56"/>
+  <circle cx="44" cy="22" r="6" fill="#ffbd2e"/>
+  <circle cx="64" cy="22" r="6" fill="#27c93f"/>
+
+  <!-- Line 1: cwd | context bar | tokens -->
+  <text x="20" y="58" fill="#ffffd7">/my-project</text>
+  <text x="140" y="58" fill="#6c6c6c">│</text>
+  <text x="156" y="58" fill="#ffd787">Ctx:</text>
+  <rect x="200" y="44" width="100" height="12" rx="3" fill="#3a3a4a"/>
+  <rect x="200" y="44" width="42" height="12" rx="3" fill="#ffd787"/>
+  <text x="308" y="58" fill="#ffd787">42%</text>
+  <text x="346" y="58" fill="#6c6c6c">│</text>
+  <text x="362" y="58" fill="#ffd787">42k/1000k</text>
+
+  <!-- Line 2: 5h window | 7d window -->
+  <text x="20" y="86" fill="#87d7d7">5h:</text>
+  <rect x="54" y="72" width="100" height="12" rx="3" fill="#3a3a4a"/>
+  <rect x="54" y="72" width="62" height="12" rx="3" fill="#87d7d7"/>
+  <text x="162" y="86" fill="#87d7d7">62% ↺ 1h23</text>
+  <text x="270" y="86" fill="#6c6c6c">│</text>
+  <text x="286" y="86" fill="#ff87af">7d:</text>
+  <rect x="320" y="72" width="100" height="12" rx="3" fill="#3a3a4a"/>
+  <rect x="320" y="72" width="28" height="12" rx="3" fill="#ff87af"/>
+  <text x="428" y="86" fill="#ff87af">28% ↺ 5j10h</text>
+
+  <!-- Line 3: model | cost | balance -->
+  <text x="20" y="114" xml:space="preserve">
+    <tspan fill="#ffd787">◆ Opus 5 (1M context)</tspan><tspan fill="#6c6c6c"> │ </tspan><tspan fill="#ffaf00">$0.0234</tspan><tspan fill="#6c6c6c"> │ </tspan><tspan fill="#afd787">$93.55</tspan>
+  </text>
+</svg>
