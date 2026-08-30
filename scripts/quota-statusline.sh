@@ -39,15 +39,15 @@ COLOR_ON=true
 [[ "$MODE" != "bar" ]] && COLOR_ON=false
 [[ -n "${NO_COLOR:-}" ]] && COLOR_ON=false
 
-C_CWD=245     # gris
+C_CWD=230     # crème
 C_SEP=238     # gris foncé (séparateurs, ◆)
-C_CTX=250     # gris clair
+C_CTX=222     # or (= C_MODEL)
 C_WARN=214    # orange (/compact)
 C_5H=116      # cyan
 C_7D=211      # rose
 C_MODEL=222   # or
 C_BALANCE=150 # vert
-C_COST=245    # gris
+C_COST=214    # orange
 
 c() { # c <code256> <texte>
   if $COLOR_ON; then
@@ -113,7 +113,11 @@ render_reset() {
   (( diff <= 0 )) && printf '~0' && return
   local h=$(( diff / 3600 ))
   local m=$(( (diff % 3600) / 60 ))
-  if (( h > 0 )); then
+  local d=$(( h / 24 ))
+  local rh=$(( h % 24 ))
+  if (( d > 0 )); then
+    printf '%dj%02dh' "$d" "$rh"
+  elif (( h > 0 )); then
     printf '%dh%02d' "$h" "$m"
   else
     printf '%d' "$m"
@@ -171,33 +175,33 @@ line2=""
 sep2=false
 if [[ -n "$five_h" ]]; then
   seg="5h:$(render_bar "$five_h")"
-  [[ -n "$five_h_resets" ]] && seg+=" ↺$(render_reset "$five_h_resets")"
+  [[ -n "$five_h_resets" ]] && seg+=" ↺ $(render_reset "$five_h_resets")"
   line2+="$(c "$C_5H" "$seg")"
   sep2=true
 fi
 if [[ -n "$seven_d" ]]; then
   $sep2 && line2+=" $(c "$C_SEP" "│") "
   seg="7j:$(render_bar "$seven_d")"
-  [[ -n "$seven_d_resets" ]] && seg+=" ↺$(render_reset "$seven_d_resets")"
+  [[ -n "$seven_d_resets" ]] && seg+=" ↺ $(render_reset "$seven_d_resets")"
   line2+="$(c "$C_7D" "$seg")"
   sep2=true
 fi
 
-# ── Line 3: model │ extra usage spent │ extra usage balance
+# ── Line 3: model │ session cost │ extra usage balance
 line3=""
 sep3=false
 if [[ -n "$model_name" ]]; then
   line3+="$(c "$C_MODEL" "◆ ${model_name}")"
   sep3=true
 fi
-if [[ "$balance_cents" =~ ^-?[0-9]+$ ]]; then
-  $sep3 && line3+=" $(c "$C_SEP" "│") "
-  line3+="$(c "$C_BALANCE" "\$$(awk -v c="$balance_cents" 'BEGIN{printf "%.2f", c/100}')")"
-  sep3=true
-fi
 if [[ -n "$cost_usd" ]]; then
   $sep3 && line3+=" $(c "$C_SEP" "│") "
   line3+="$(c "$C_COST" "\$$(printf '%.4f' "$cost_usd" 2>/dev/null)")"
+  sep3=true
+fi
+if [[ "$balance_cents" =~ ^-?[0-9]+$ ]]; then
+  $sep3 && line3+=" $(c "$C_SEP" "│") "
+  line3+="$(c "$C_BALANCE" "\$$(awk -v c="$balance_cents" 'BEGIN{printf "%.2f", c/100}')")"
 fi
 
 for l in "$line1" "$line2" "$line3"; do

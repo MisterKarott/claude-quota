@@ -4,7 +4,7 @@
 
 **Claude Code Quota Monitor**
 
-Affiche l'utilisation de tes fenêtres de tokens Claude Code directement dans ta statusline, quel que soit ton abonnement (Pro, Max, ...).
+Shows your Claude Code token window usage right in your statusline, whatever your subscription (Pro, Max, ...).
 
 [![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-blue)](https://claude.ai/code) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -12,59 +12,61 @@ Affiche l'utilisation de tes fenêtres de tokens Claude Code directement dans ta
 
 ---
 
-## Ce que ça fait
+## What it does
 
-Claude Code limite l'usage sur deux fenêtres, quel que soit l'abonnement :
+Claude Code caps usage on two windows, whatever the subscription:
 
-- **Fenêtre 5h** — tokens consommés sur les 5 dernières heures
-- **Fenêtre 7j** — tokens consommés sur les 7 derniers jours
+- **5h window** — tokens consumed over the last 5 hours
+- **7d window** — tokens consumed over the last 7 days
 
-`claude-quota` affiche le modèle, l'usage du contexte, les limites de tokens, le temps avant réinitialisation et le solde extra usage restant en **temps réel** dans ta statusline Claude Code — sur trois lignes, en couleur (une couleur par segment).
+`claude-quota` shows the model, context usage, rate limits, time until reset, and remaining extra-usage balance in **real time** in your Claude Code statusline — across three lines, in color (one color per segment).
 
-### Exemple de statusline
+Why three lines instead of one: it takes up less width, so it stays readable when working with several terminal windows side by side. On a single line, information ends up truncated as soon as the window gets narrow — on three lines, everything stays fully visible.
 
-```
-/mon-projet │ Ctx:████░░░░░░ 42% │ 42k/1000k
-5h:██████░░░░ 62% ↺1h23 │ 7j:███░░░░░░░ 28% ↺31h05
-◆ Opus 5 (1M context) │ $93.55 │ $0.0234
-```
-
-Quand le contexte dépasse 50% :
+### Statusline example
 
 ```
-/mon-projet │ Ctx:██████░░░░ 62% │ 62k/1000k │ ⚡ /compact
-5h:██████░░░░ 62% ↺1h23 │ 7j:███░░░░░░░ 28% ↺31h05
-◆ Opus 5 (1M context) │ $93.55 │ $0.0234
+/my-project │ Ctx:████░░░░░░ 42% │ 42k/1000k
+5h:██████░░░░ 62% ↺ 1h23 │ 7d:███░░░░░░░ 28% ↺ 5j10h
+◆ Opus 5 (1M context) │ $0.0234 │ $93.55
 ```
 
-- **Ligne 1** : dossier actif + barre de contexte + token count + hint `/compact` si ≥ 50%
-- **Ligne 2** : fenêtres de rate limit + temps avant reset (`↺Xh MM`)
-- **Ligne 3** : modèle actif + solde extra usage restant + coût API de la session
-- **Affichage** : couleur par segment (ANSI 256), désactivable via `NO_COLOR=1`
+When context usage goes above 50%:
 
-### Skill `/quota`
+```
+/my-project │ Ctx:██████░░░░ 62% │ 62k/1000k │ ⚡ /compact
+5h:██████░░░░ 62% ↺ 1h23 │ 7d:███░░░░░░░ 28% ↺ 5j10h
+◆ Opus 5 (1M context) │ $0.0234 │ $93.55
+```
 
-Tape `/quota` ou "combien de quota il me reste ?" pour un affichage détaillé avec tableau formaté.
+- **Line 1**: active directory + context bar + token count + `/compact` hint if ≥ 50%
+- **Line 2**: rate limit windows + time until reset (`↺ Xh MM`, or `↺ Xj HHh` past 24h)
+- **Line 3**: active model + session API cost + remaining extra-usage balance
+- **Display**: color per segment (ANSI 256), can be disabled with `NO_COLOR=1`
+
+### `/quota` skill
+
+Type `/quota` or "how much quota do I have left?" for a detailed view with a formatted table.
 
 ---
 
 ## Installation
 
-### 1. Installer le plugin
+### 1. Install the plugin
 
 ```bash
 claude plugin install claude-quota
 ```
 
-> Si le marketplace n'est pas encore ajouté :
+> If the marketplace isn't added yet:
 > ```bash
 > claude plugin marketplace add https://github.com/MisterKarott/claude-quota
 > claude plugin install claude-quota
 > ```
 
-### 2. Configurer la statusline
+### 2. Configure the statusline
 
-Dans `~/.claude/settings.json` :
+In `~/.claude/settings.json`:
 
 ```json
 {
@@ -76,15 +78,15 @@ Dans `~/.claude/settings.json` :
 }
 ```
 
-> Vérifier le chemin exact avec `ls ~/.claude/plugins/cache/ | grep claude-quota` après installation.
+> Check the exact path with `ls ~/.claude/plugins/cache/ | grep claude-quota` after installing.
 
-### 3. Relancer Claude Code
+### 3. Restart Claude Code
 
 ---
 
-## Comment ça marche
+## How it works
 
-Claude Code injecte les données via stdin à chaque tour. Le script lit :
+Claude Code injects data via stdin on every turn. The script reads:
 
 ```json
 {
@@ -104,26 +106,26 @@ Claude Code injecte les données via stdin à chaque tour. Le script lit :
 }
 ```
 
-Le solde extra usage est récupéré via `/api/oauth/organizations/{org}/prepaid/credits` (token OAuth du keychain macOS), mis en cache 5 min et rafraîchi en arrière-plan. Le reste vient de Claude Code en local.
+The extra-usage balance is fetched via `/api/oauth/organizations/{org}/prepaid/credits` (OAuth token from the macOS keychain), cached for 5 minutes and refreshed in the background. Everything else comes from Claude Code locally.
 
 ---
 
-## Composants
+## Components
 
-| Composant | Type | Description |
+| Component | Type | Description |
 |-----------|------|-------------|
-| `quota-statusline.sh` | Script | Affichage statusline avec barres et temps de reset |
-| `quota` | Skill | Vue détaillée à la demande |
+| `quota-statusline.sh` | Script | Statusline display with bars and reset countdowns |
+| `quota` | Skill | On-demand detailed view |
 
 ---
 
 ## Requirements
 
-| Dépendance | Pourquoi |
-|------------|----------|
-| Claude Code CLI | Host du plugin |
-| Abonnement Claude Code (Pro, Max, ...) | Les données de rate limit |
-| `jq` | Parsing JSON |
+| Dependency | Why |
+|------------|-----|
+| Claude Code CLI | Plugin host |
+| Claude Code subscription (Pro, Max, ...) | Rate limit data |
+| `jq` | JSON parsing |
 
 ---
 
