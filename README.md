@@ -44,17 +44,11 @@ Type `/quota` or "how much quota do I have left?" for a detailed view with a for
 
 ## Installation
 
-### 1. Install the plugin
+### 1. Clone the repo
 
 ```bash
-claude plugin install claude-quota
+git clone https://github.com/MisterKarott/claude-quota.git ~/.claude/claude-quota
 ```
-
-> If the marketplace isn't added yet:
-> ```bash
-> claude plugin marketplace add https://github.com/MisterKarott/claude-quota
-> claude plugin install claude-quota
-> ```
 
 ### 2. Configure the statusline
 
@@ -64,13 +58,13 @@ In `~/.claude/settings.json`:
 {
   "statusLine": {
     "type": "command",
-    "command": "bash ${HOME}/.claude/plugins/cache/github-MisterKarott-claude-quota/claude-quota/1.4.2/scripts/quota-statusline.sh --mode bar",
+    "command": "bash ${HOME}/.claude/claude-quota/scripts/quota-statusline.sh --mode bar",
     "padding": 0
   }
 }
 ```
 
-> Check the exact path with `ls ~/.claude/plugins/cache/ | grep claude-quota` after installing.
+To use the `/quota` skill too, copy or symlink `skills/quota/` into your `~/.claude/skills/` directory.
 
 ### 3. Restart Claude Code
 
