@@ -2,9 +2,9 @@
 
 # claude-quota
 
-**Claude Pro Quota Monitor for Claude Code**
+**Claude Code Quota Monitor**
 
-Affiche l'utilisation de tes fenêtres de tokens Claude Pro directement dans ta statusline.
+Affiche l'utilisation de tes fenêtres de tokens Claude Code directement dans ta statusline, quel que soit ton abonnement (Pro, Max, ...).
 
 [![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-blue)](https://claude.ai/code) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -14,7 +14,7 @@ Affiche l'utilisation de tes fenêtres de tokens Claude Pro directement dans ta 
 
 ## Ce que ça fait
 
-Claude Pro limite l'usage sur deux fenêtres :
+Claude Code limite l'usage sur deux fenêtres, quel que soit l'abonnement :
 
 - **Fenêtre 5h** — tokens consommés sur les 5 dernières heures
 - **Fenêtre 7j** — tokens consommés sur les 7 derniers jours
@@ -70,7 +70,7 @@ Dans `~/.claude/settings.json` :
 {
   "statusLine": {
     "type": "command",
-    "command": "bash ${HOME}/.claude/plugins/cache/github-MisterKarott-claude-quota/claude-quota/1.3.2/scripts/quota-statusline.sh --mode bar",
+    "command": "bash ${HOME}/.claude/plugins/cache/github-MisterKarott-claude-quota/claude-quota/1.3.3/scripts/quota-statusline.sh --mode bar",
     "padding": 0
   }
 }
@@ -122,7 +122,7 @@ Le solde extra usage est récupéré via `/api/oauth/organizations/{org}/prepaid
 | Dépendance | Pourquoi |
 |------------|----------|
 | Claude Code CLI | Host du plugin |
-| Claude Pro | Les données de rate limit |
+| Abonnement Claude Code (Pro, Max, ...) | Les données de rate limit |
 | `jq` | Parsing JSON |
 
 ---

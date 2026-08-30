@@ -1,5 +1,5 @@
 #!/bin/bash
-# Statusline script for Claude Pro — 3 lines: cwd + model/context + rate limits/extra-usage balance
+# Statusline script for Claude Code — 3 lines: cwd + model/context + rate limits/extra-usage balance
 # Reads JSON injected by Claude Code via stdin
 
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/claude-quota"
